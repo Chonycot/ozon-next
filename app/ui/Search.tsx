@@ -1,25 +1,24 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { usePathname, useSearchParams, useRouter } from "next/navigation"
 
-export default function Search() {
+function SearchContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const pathname = usePathname()
 
-     const [search, updateSearch] = useState('')
+    const [search, updateSearch] = useState('')
 
     const updateFilter = (value: string) => {
         const params = new URLSearchParams(searchParams)
-
-        if(value) {
+        if (value) {
             params.set('search', value)
         } else {
             params.delete('search')
         }
 
-        router.replace(`${pathname} ?${params.toString()}`)
+        router.replace(`${pathname}?${params.toString()}`)
     }
 
     useEffect(() => {
@@ -28,22 +27,38 @@ export default function Search() {
 
         if (searchParam) {
             updateSearch(searchParam)
-        }else {
+        } else {
             updateSearch('')
         }
 
-console.log(1)
-
+        console.log(1) // Логирование сработает уже в браузере
     }, [searchParams])
 
     return (
         <div className="search">
             <div className="search-wrapper">
-                <input className="search-wrapper_input" type="text" value={search} onChange={(event) => updateSearch(event.target.value)}/>
+                <input className="search-wrapper_input" type="text" value={search} onChange={(event) => updateSearch(event.target.value)} />
             </div>
             <div className="search-btn">
                 <button onClick={() => updateFilter(search)}></button>
             </div>
         </div>
+    )
+}
+
+export default function Search() {
+    return (
+        <Suspense fallback={
+            <div className="search">
+                <div className="search-wrapper">
+                    <input className="search-wrapper_input" type="text" disabled placeholder="Загрузка..." />
+                </div>
+                <div className="search-btn">
+                    <button disabled></button>
+                </div>
+            </div>
+        }>
+            <SearchContent />
+        </Suspense>
     )
 }
